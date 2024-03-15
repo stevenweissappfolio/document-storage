@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<head>
+  <title>Document Storage</title>
+</head>
+<body>
+  <textarea id='editor'></textarea>
+
+  <script>
+    const DEFAULT_DATA = Object.freeze({
+      keys: [],
+      values: {},
+    });
+
+    const ELEMENT_ID = 'document-storage';
+
+    let data;
+
+    (function read() {
+      const element = document.getElementById(ELEMENT_ID);
+
+      if (!element) {
+        data = Object.assign({}, DEFAULT_DATA);
+      } else {
+        data = JSON.parse(element.innerHTML);
+      }
+    })();
+
+    function write() {
+      let element = document.getElementById(ELEMENT_ID);
+
+      if (!element) {
+        element = document.createElement('script');
+
+        element.setAttribute('id', ELEMENT_ID);
+        element.setAttribute('type', 'text/json');
+
+        document.body.prepend(element);
+      }
+
+      element.innerHTML = JSON.stringify(data);
+    }
+
+    window.documentStorage = {
+      get length() {
+        return data.keys.length;
+      },
+
+      key(i) {
+        return data.keys[i];
+      },
+
+      getItem(key) {
+        return data.values[key];
+      },
+
+      setItem(key, value) {
+        data.values[key] = value;
+
+        write();
+      },
+
+      removeItem(key) {
+        data.keys.splice(data.keys.indexOf(key), 1);
+
+        delete data.values[key];
+
+        write();
+      },
+
+      clear() {
+        data = Object.assign({}, DEFAULT_DATA);
+
+        write();
+      },
+    };
+  </script>
+
+  <script>
+    const editor = document.getElementById('editor');
+
+    editor.value = documentStorage.getItem('text') || '';
+
+    editor.addEventListener('keyup', function (event) {
+      documentStorage.setItem('text', event.target.value);
+    });
+  </script>
+</body>
+</html>
